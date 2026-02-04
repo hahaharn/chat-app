@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<!-- Thymeleaf使う宣言 -->
+<html xmlns:th="http://www.thymeleaf.org" lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <!-- リセットCSS -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
+  <!-- CSSの読み込み -->
+  <link rel="stylesheet" th:href="@{/css/style.css}" />
+  <title>ChatApp</title>
+</head>
+
+<body>
+  <!-- 部分テンプレートでファイル分割（サイドバーとチャット画面） -->
+  <div class="wrapper">
+    <div class="side_bar">
+      <div th:insert="~{side_bar :: side_bar}"></div>
+    </div>
+    <div class="chat">
+      <div th:insert="~{main_chat :: main_chat}"></div>
+    </div>
+  </div>
+</body>
+
+</html>
