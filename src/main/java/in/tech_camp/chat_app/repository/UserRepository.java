@@ -27,16 +27,15 @@ public interface UserRepository {
     ・「user」の部分は好きにつけていいらしい。このあとコントローラーで使う。
     ・インターフェース内ではpublicなどつけない*/
 
-  /* ログインカスタマイズのときに使用
-    （emailでユーザー情報を取得するメソッド：UserAuthenticationServiceファイルで使用）*/
+  /* emailでユーザー情報を取得するメソッ*/
   @Select("SELECT * FROM users WHERE email = #{email}")
   UserEntity findByEmail(String email);
 
-  /*ユーザー情報編集のときに使用（idでユーザー情報を取得するメソッド）*/
+  /*idでユーザー情報を取得するメソッド*/
   @Select("SELECT * FROM users WHERE id = #{id}")
   UserEntity findById(Integer id);
 
-  /*ユーザー情報編集完了後のユーザー情報更新で使用*/
+  /*ユーザー情報更新*/
   @Update("UPDATE users SET name = #{name}, email = #{email} WHERE id = #{id}")
   void update(UserEntity user);
 }
