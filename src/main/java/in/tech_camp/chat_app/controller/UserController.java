@@ -4,11 +4,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import in.tech_camp.chat_app.entity.UserEntity;
 import in.tech_camp.chat_app.form.LoginForm;
+import in.tech_camp.chat_app.form.UserEditForm;
 import in.tech_camp.chat_app.form.UserForm;
 import in.tech_camp.chat_app.repository.UserRepository;
 import in.tech_camp.chat_app.service.UserService;
@@ -83,5 +85,51 @@ public class UserController {
       model.addAttribute("loginError", "メールアドレスかパスワードが間違っています。");
     }
     return "users/login";
+    /*@RequestParam(value = "error", required = false) String error：URLの情報
+    ・value = "error"：URLに「?error」という文字が含まれていないかチェック
+    ・required = false：errorがなくても怒らないで（エラーにしないで）という意味
+    @ModelAttribute("loginForm") LoginForm loginForm：HTMLと「入力項目」を繋ぐ。フォームの情報
+    ・ログイン画面（HTML）にあるメアドやパスの入力欄と、Javaのオブジェクトを結びつけるための空の箱
+    Model model
+    ・画面への運び屋。「ログインに失敗しました」というメッセージなどを入れて、HTML側に持ち帰るための道具*/
+  }
+
+
+  // ユーザー情報変更ボタンが押されたとき（今登録されている情報をDBから取って入力欄に下書きとして表示させる）
+  @GetMapping("/users/{userId}/edit")
+  //↑URLの一部を変数として扱うための書き方
+  /*↓@PathVariable("userId")：URLの{userId}の部分をJavaの変数userIdとして取り出す。
+    これで誰の情報を編集したいのかを特定できる。*/
+  public String editUserForm(@PathVariable("userId") Integer userId, Model model) {
+    UserEntity user = userRepository.findById(userId);  //userRepositoryの中のfindByIdメソッド
+
+    /*編集画面専用の「空の箱（フォームオブジェクト）」を新しく作り、
+      user（DBから持ってきた生データ）の中身を、userForm（画面表示用の箱）へ詰め替えていく*/
+    UserEditForm userForm = new UserEditForm();
+    userForm.setId(user.getId());
+    userForm.setName(user.getName());
+    userForm.setEmail(user.getEmail());
+
+    // バケツ（Model）に入れて画面に渡す
+    model.addAttribute("user", userForm);
+    return "users/edit";
+  }
+
+
+  // ユーザー情報編集して更新されるとき
+  @PostMapping("/users/{userId}")
+  public String updateUser(@PathVariable("userId") Integer userId, @ModelAttribute("user") UserEditForm userEditForm, Model model) {
+    UserEntity user = userRepository.findById(userId);
+    user.setName(userEditForm.getName());
+    user.setEmail(userEditForm.getEmail());
+
+    try {
+      userRepository.update(user);
+    } catch (Exception e) {
+      System.out.println("エラー：" + e);
+      model.addAttribute("user", userEditForm);
+      return "users/edit";
+    }
+    return "redirect:/";
   }
 }

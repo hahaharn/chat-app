@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import in.tech_camp.chat_app.entity.UserEntity;
 
@@ -30,4 +31,12 @@ public interface UserRepository {
     （emailでユーザー情報を取得するメソッド：UserAuthenticationServiceファイルで使用）*/
   @Select("SELECT * FROM users WHERE email = #{email}")
   UserEntity findByEmail(String email);
+
+  /*ユーザー情報編集のときに使用（idでユーザー情報を取得するメソッド）*/
+  @Select("SELECT * FROM users WHERE id = #{id}")
+  UserEntity findById(Integer id);
+
+  /*ユーザー情報編集完了後のユーザー情報更新で使用*/
+  @Update("UPDATE users SET name = #{name}, email = #{email} WHERE id = #{id}")
+  void update(UserEntity user);
 }
