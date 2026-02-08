@@ -1,7 +1,13 @@
 package in.tech_camp.chat_app.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +20,7 @@ import in.tech_camp.chat_app.form.UserEditForm;
 import in.tech_camp.chat_app.form.UserForm;
 import in.tech_camp.chat_app.repository.UserRepository;
 import in.tech_camp.chat_app.service.UserService;
+import in.tech_camp.chat_app.validation.ValidationOrder;
 import lombok.AllArgsConstructor;
 
 @Controller
@@ -41,13 +48,33 @@ public class UserController {
   @PostMapping("/user")
   /* @PostMapping：フォーム送信などの「保存・投稿」のアクセスがあったときに使う。
    （）内のURLに送られてきたデータを受け取る窓口*/
-  public String createUser(@ModelAttribute("userForm") UserForm userForm, Model model){
-  /*・引数内はフォームの情報。すぐ下でこの情報をUserEntityに移し替えて、UserRepositoryでDBに挿入する
-    ・@ModelAttribute：フォームの入力データをJavaのオブジェクトに自動で詰め込んだり、画面にデータを渡したりする
-    ・@ModelAttribute()の()内は、ビューで呼び出すときの名称
+  public String createUser(@ModelAttribute("userForm") @Validated(ValidationOrder.class) UserForm userForm, BindingResult result, Model model){
+  /*・引数内はフォームの情報。↓でこの情報をUserEntityに移し替えて、UserRepositoryでDBに挿入する
     ・@ModelAttribute("userForm") UserForm userForm：@GetMappingで用意していた「UserForm」という箱に、入力された内容が詰められて戻ってきた状況
     ・Model model：戻ってきたときに新しく用意された空の入れ物。エラーが起きて再度入力するときとかに必要なので。
-  */
+    ・@Validated(ValidationOrder.class)、BindingResult result：バリデーションを実行するアノテーションと結果を受け取るBindingResultを追加 */
+    userForm.validatePasswordConfirmation(result);  // userForm内で作ったメソッド
+
+    /*リポジトリに追加したメアド重複チェックメソッドを使用し、メアドがすでに使用されていないかチェック。
+      すでに存在している場合は、BindingResultオブジェクトにエラーを追加*/
+    if (userRepository.existsByEmail(userForm.getEmail())) {
+      result.rejectValue("email", "null", "Email already exists");
+    }
+
+    /*コントローラーでバリデーションエラーがあったらサインアップ画面に止まりエラー表示を行う処理。
+      BindingResultを確認し、エラーがある場合はmodelに追加し、サインアップ画面を返す。
+      UserFormのオブジェクトを渡すことで、再度サインアップ画面を表示させたときに、入力値が残るようになる*/
+    if (result.hasErrors()) {
+      List<String> errorMessages = result.getAllErrors().stream()
+              .map(DefaultMessageSourceResolvable::getDefaultMessage)
+              //↑流れてきた複雑なエラー情報から「ユーザーに見せるためのメッセージ」だけを抜き出す作業
+              .collect(Collectors.toList());
+              //↑加工されたメッセージを再度1つの新しいリストList<String>にまとめ直す
+      model.addAttribute("errorMessages", errorMessages);
+      model.addAttribute("userForm", userForm);
+      return "users/signUp";
+    }
+
     // 画面用の箱(UserForm）から取り出したデータを保存用の箱（UserEntity）に移し替える
     UserEntity userEntity = new UserEntity();
     userEntity.setName(userForm.getName());
@@ -118,7 +145,20 @@ public class UserController {
 
   // ユーザー情報編集して更新されるとき
   @PostMapping("/users/{userId}")
-  public String updateUser(@PathVariable("userId") Integer userId, @ModelAttribute("user") UserEditForm userEditForm, Model model) {
+  public String updateUser(@PathVariable("userId") Integer userId, @ModelAttribute("user") @Validated(ValidationOrder.class) UserEditForm userEditForm, BindingResult result, Model model) {
+    String newEmail = userEditForm.getEmail();
+    if (userRepository.existsByEmailExcludingCurrent(newEmail, userId)) {
+      result.rejectValue("email", "error.user", "Email already exists");
+    }
+    if (result.hasErrors()) {
+      List<String> errorMessages = result.getAllErrors().stream()
+                                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                                    .collect(Collectors.toList());
+      model.addAttribute("errorMessages", errorMessages);
+      model.addAttribute("user", userEditForm);
+      return "users/edit";
+    }
+
     UserEntity user = userRepository.findById(userId);
     user.setName(userEditForm.getName());
     user.setEmail(userEditForm.getEmail());
