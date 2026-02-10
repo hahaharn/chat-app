@@ -29,7 +29,7 @@ public interface UserRepository {
     ・「user」の部分は好きにつけていいらしい。このあとコントローラーで使う。
     ・インターフェース内ではpublicなどつけない*/
 
-  /* emailでユーザー情報を取得するメソッ*/
+  /* emailでユーザー情報を取得するメソッド*/
   @Select("SELECT * FROM users WHERE email = #{email}")
   UserEntity findByEmail(String email);
 
