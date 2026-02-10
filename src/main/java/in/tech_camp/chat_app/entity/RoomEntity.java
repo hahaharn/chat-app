@@ -5,12 +5,10 @@ import java.util.List;
 import lombok.Data;
 
 @Data
-public class UserEntity {
+public class RoomEntity {
   private Integer id;
   private String name;
-  private String email;
-  private String password;
   // ↓ユーザー情報からroom_usersの情報が取得できるように追加
-  // ↓1つのUserEntityから複数のRoomUserEntityが紐づくためリストのフィールドを追加
+  // ↓1つのRoomEntityから複数のRoomUserEntityが紐づくためリストのフィールドを追加
   private List<RoomUserEntity> roomUsers;
 }

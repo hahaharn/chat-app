@@ -1,5 +1,7 @@
 package in.tech_camp.chat_app.repository;
 
+import java.util.List;
+
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
@@ -27,7 +29,7 @@ public interface UserRepository {
     ・「user」の部分は好きにつけていいらしい。このあとコントローラーで使う。
     ・インターフェース内ではpublicなどつけない*/
 
-  /* emailでユーザー情報を取得するメソッ*/
+  /* emailでユーザー情報を取得するメソッド*/
   @Select("SELECT * FROM users WHERE email = #{email}")
   UserEntity findByEmail(String email);
 
@@ -46,4 +48,8 @@ public interface UserRepository {
   // email編集のときに使用（"自分を除外"した状態でそのメアドが使われていないかを判断している）
   @Select("SELECT COUNT(*) > 0 FROM users WHERE email = #{email} AND id != #{userId}")
   boolean existsByEmailExcludingCurrent(String email, Integer userId);
+
+  // チャットルーム作成時のユーザー選択時に自分以外の全ユーザーをリストアップする
+  @Select("SELECT * FROM users WHERE id <> #{excludedId}")
+  List<UserEntity> findAllExcept(Integer excludedId);
 }
