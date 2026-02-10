@@ -29,9 +29,22 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public class RoomController {
   private final UserRepository userRepository;
-
   private final RoomRepository roomRepository;
   private final RoomUserRepository roomUserRepository;
+
+  @GetMapping("/")
+  public String index(@AuthenticationPrincipal CustomUserDetail currentUser, Model model) {
+    UserEntity user = userRepository.findById(currentUser.getId());
+    model.addAttribute("user", user);
+    // ↓自分が参加している中間データを取得している
+    List<RoomUserEntity> roomUserEntities = roomUserRepository.findByUserId(currentUser.getId());
+    List<RoomEntity> roomList = roomUserEntities.stream()
+                                                .map(RoomUserEntity::getRoom)
+                                                .collect(Collectors.toList());
+    model.addAttribute("rooms", roomList);
+    return "rooms/index";
+  }
+
 
   /*・ルーム新規作成ボタンが押されたら、空の箱を作る
   　・ユーザー選択時に自分以外のユーザーを選択できるようにしている*/
