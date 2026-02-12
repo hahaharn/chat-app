@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### アップロードされた画像ファイルはGitHubに保存しない ###
+src/main/resources/static/uploads/**
