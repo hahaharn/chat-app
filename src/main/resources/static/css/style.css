@@ -6,7 +6,7 @@
   display: flex;
 }
 
-.side_bar {
+.side-bar {
   background-color: #253141;
   width: 300px;
   height: 100vh;
@@ -21,10 +21,10 @@
   align-items: center;
 }
 
-.header-name a {  /*このクラス中のリンクだけをデザインしてという意味*/
+.header-name a{
   font-size: 16px;
   color: #FAFAFA;
-  text-decoration: none;  /*アンダーライン消す*/
+  text-decoration: none;
 }
 
 .create-room a {
@@ -70,14 +70,16 @@
 }
 
 .header-button {
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
-.header-button a {
+.header-button input[type="submit"] {
   text-decoration: none;
   border: 1px solid darkred;
   color: darkred;
+  background-color: #fff;
   padding: 20px;
+  cursor: pointer;
 }
 
 .messages {
