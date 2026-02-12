@@ -48,9 +48,13 @@ public class MessageController {
     model.addAttribute("messageForm", new MessageForm());
     model.addAttribute("roomId", roomId);
 
+    List<MessageEntity> messages = messageRepository.findByRoomId(roomId);
+    model.addAttribute("messages", messages);
+
     return "messages/index";
   }
 
+  // メッセージ送信ボタンを押したときの動き（DBへの保存＋ルーム画面へのリダイレクト）
   @PostMapping("/rooms/{roomId}/messages")
   public String saveMessage(@PathVariable("roomId") Integer roomId, @ModelAttribute("messageForm") MessageForm messageForm, @AuthenticationPrincipal CustomUserDetail currentUser) {
     MessageEntity message = new MessageEntity();
